@@ -4,6 +4,7 @@ from threading import Thread
 import time
 import os
 import requests
+import json
 
 from dotenv import load_dotenv
 
@@ -35,8 +36,24 @@ def delete_video_and_thumbnail(video_id):
         os.remove(thumbnail_path)
 
 
+# 마지막으로 처리한 동영상 ID 목록을 저장하는 함수
+def save_processed_video_ids(video_ids):
+    with open('processed_videos.json', 'w') as file:
+        json.dump(video_ids, file)
+
+
+# 마지막으로 처리한 동영상 ID 목록을 불러오는 함수
+def load_processed_video_ids():
+    if os.path.exists('processed_videos.json'):
+        with open('processed_videos.json', 'r') as file:
+            return json.load(file)
+    return []
+
+
 # 인기 동영상 ID를 주기적으로 가져와 다운로드하는 함수
 def fetch_and_download_videos():
+    processed_video_ids = load_processed_video_ids()
+
     while True:
         params = {
             "part": "snippet",
@@ -50,7 +67,9 @@ def fetch_and_download_videos():
         data = response.json()
 
         video_ids = [item['id'] for item in data['items']]
-        for video_id in video_ids:
+        new_video_ids = [vid for vid in video_ids if vid not in processed_video_ids]
+
+        for video_id in new_video_ids:
             try:
                 downloader.Downloader().execute(videoId=video_id)
                 video_path = f'assets/{video_id}/video.mp4'
@@ -68,6 +87,11 @@ def fetch_and_download_videos():
 
                 # 동영상과 썸네일 삭제
                 delete_video_and_thumbnail(video_id)
+
+                # 처리한 동영상 ID 목록에 추가
+                processed_video_ids.append(video_id)
+                save_processed_video_ids(processed_video_ids)
+
             except Exception as e:
                 print(f"Error processing video {video_id}: {e}")
 
@@ -78,7 +102,9 @@ def fetch_and_download_videos():
             data = response.json()
 
             video_ids = [item['id'] for item in data['items']]
-            for video_id in video_ids:
+            new_video_ids = [vid for vid in video_ids if vid not in processed_video_ids]
+
+            for video_id in new_video_ids:
                 try:
                     downloader.Downloader().execute(videoId=video_id)
                     video_path = f'assets/{video_id}/video.mp4'
@@ -96,6 +122,11 @@ def fetch_and_download_videos():
 
                     # 동영상과 썸네일 삭제
                     delete_video_and_thumbnail(video_id)
+
+                    # 처리한 동영상 ID 목록에 추가
+                    processed_video_ids.append(video_id)
+                    save_processed_video_ids(processed_video_ids)
+
                 except Exception as e:
                     print(f"Error processing video {video_id}: {e}")
 
