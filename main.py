@@ -142,7 +142,7 @@ download_thread.daemon = True
 download_thread.start()
 
 
-@app.route('/process_video', methods=['GET'])
+@app.route('/api/process_video', methods=['GET'])
 def process_video():
     videoId = request.args.get('videoId')
     if not videoId:
