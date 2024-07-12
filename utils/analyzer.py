@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import time
 from tensorflow.keras.applications import MobileNetV2
+from tensorflow.keras.applications import MobileNetV3Small
 from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 from tensorflow.keras.preprocessing import image
 from sklearn.metrics.pairwise import cosine_similarity
@@ -9,7 +10,10 @@ import matplotlib.pyplot as plt
 import tensorflow as tf
 
 class ImageAnalyzer:
-    def __init__(self, video_path, target_image_path, sampling_interval=10):
+    def __init__(self, video_path, target_image_path, sampling_interval=30):
+        # XLA 컴파일러 활성화
+        tf.config.optimizer.set_jit(True)
+
         # GPU 사용 여부를 확인
         physical_devices = tf.config.experimental.list_physical_devices('GPU')
         if len(physical_devices) > 0:
@@ -21,22 +25,29 @@ class ImageAnalyzer:
         self.video_path = video_path
         self.target_image_path = target_image_path
         self.sampling_interval = sampling_interval
-        self.model = MobileNetV2(weights='imagenet', include_top=False, pooling='avg')
+
+        self.model = MobileNetV3Small(weights='imagenet', include_top=False, pooling='avg')
+        # self.model = MobileNetV3Small(weights='imagenet', include_top=False, pooling='avg', input_shape=(96, 96, 3))
+        # self.model = MobileNetV2(weights='imagenet', include_top=False, pooling='avg')
+
         self.target_image_features = self.extract_features(self.load_target_image())
 
     def load_target_image(self):
         img = image.load_img(self.target_image_path, target_size=(224, 224))
+        # img = image.load_img(self.target_image_path, target_size=(96, 96))
         img_data = image.img_to_array(img)
         img_data = np.expand_dims(img_data, axis=0)
         img_data = preprocess_input(img_data)
         return img_data
 
     def extract_features(self, img_data):
-        features = self.model.predict(img_data)
+        # features = self.model.predict(img_data)
+        features = self.model.predict(img_data, batch_size=32)
         return features.flatten()
 
     def preprocess_frame(self, frame):
         frame = cv2.resize(frame, (224, 224))
+        # frame = cv2.resize(frame, (96, 96))
         frame = image.img_to_array(frame)
         frame = np.expand_dims(frame, axis=0)
         frame = preprocess_input(frame)

@@ -196,3 +196,12 @@ def process_video():
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=50001)
+
+    # model3-224: elapse 165, frame 908, similarity 0.99
+    # model3-224-모델만 바꿈: elapse 137, frame 908, similarity 0.99
+    # model3-224-모델만 바꿈-interval30: elapse 49, frame 957, similarity 0.99
+    # model3-96-모델만 바꿈: elapse 137, frame 215, similarity 0.99
+    # model3-96-모델만 바꿈-2: elapse 137, frame 215, similarity 0.99
+    # model3-128: elapse 160, frame 327, similarity 0.99
+    # model2-224: elapse 148, frame 668, similarity 0.69
+    # model2-128: elapse 140, frame 992, similarity 0.56
