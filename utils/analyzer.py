@@ -6,9 +6,18 @@ from tensorflow.keras.applications.mobilenet_v2 import preprocess_input
 from tensorflow.keras.preprocessing import image
 from sklearn.metrics.pairwise import cosine_similarity
 import matplotlib.pyplot as plt
+import tensorflow as tf
 
 class ImageAnalyzer:
     def __init__(self, video_path, target_image_path, sampling_interval=10):
+        # GPU 사용 여부를 확인
+        physical_devices = tf.config.experimental.list_physical_devices('GPU')
+        if len(physical_devices) > 0:
+            print("Using GPU:", physical_devices)
+            tf.config.experimental.set_memory_growth(physical_devices[0], True)
+        else:
+            print("No GPU found. Using CPU.")
+
         self.video_path = video_path
         self.target_image_path = target_image_path
         self.sampling_interval = sampling_interval
