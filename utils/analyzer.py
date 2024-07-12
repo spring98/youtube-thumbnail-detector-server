@@ -96,6 +96,11 @@ class ImageAnalyzer:
 
         frame_rate = cap.get(cv2.CAP_PROP_FPS)
         total_frames = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+        video_duration = total_frames / frame_rate
+
+        if video_duration > 1800:  # 동영상 길이가 30분(1800초) 이상이면
+            print("Video is longer than 20 minutes. Skipping analysis.")
+            return None, -1
 
         start_time = time.time()
 
