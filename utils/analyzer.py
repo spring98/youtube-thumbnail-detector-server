@@ -26,7 +26,9 @@ class ImageAnalyzer:
         self.target_image_path = target_image_path
         self.sampling_interval = sampling_interval
 
-        self.model = MobileNetV3Small(weights='imagenet', include_top=False, pooling='avg')
+        self.input_size = (224, 224)  # 모델 입력 크기 설정
+        self.model = MobileNetV3Small(weights='imagenet', include_top=False, pooling='avg', input_shape=self.input_size + (3,))
+        # self.model = MobileNetV3Small(weights='imagenet', include_top=False, pooling='avg')
         # self.model = MobileNetV3Small(weights='imagenet', include_top=False, pooling='avg', input_shape=(96, 96, 3))
         # self.model = MobileNetV2(weights='imagenet', include_top=False, pooling='avg')
 
