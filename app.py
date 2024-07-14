@@ -56,14 +56,14 @@ def delete_video_and_thumbnail(video_id):
 
 # 마지막으로 처리한 동영상 ID 목록을 저장하는 함수
 def save_processed_video_ids(video_ids):
-    with open('processed_videos.json', 'w') as file:
+    with open('.videos.json', 'w') as file:
         json.dump(video_ids, file)
 
 
 # 마지막으로 처리한 동영상 ID 목록을 불러오는 함수
 def load_processed_video_ids():
-    if os.path.exists('processed_videos.json'):
-        with open('processed_videos.json', 'r') as file:
+    if os.path.exists('.videos.json'):
+        with open('.videos.json', 'r') as file:
             return json.load(file)
     return []
 
@@ -195,13 +195,6 @@ def process_video():
 
 
 if __name__ == '__main__':
-    app.run(debug=True, host='0.0.0.0', port=50001)
+    app.run(debug=False, host='0.0.0.0', port=50001)
 
-    # model3-224: elapse 165, frame 908, similarity 0.99
-    # model3-224-모델만 바꿈: elapse 137, frame 908, similarity 0.99
-    # model3-224-모델만 바꿈-interval30: elapse 49, frame 957, similarity 0.99
-    # model3-96-모델만 바꿈: elapse 137, frame 215, similarity 0.99
-    # model3-96-모델만 바꿈-2: elapse 137, frame 215, similarity 0.99
-    # model3-128: elapse 160, frame 327, similarity 0.99
-    # model2-224: elapse 148, frame 668, similarity 0.69
-    # model2-128: elapse 140, frame 992, similarity 0.56
+

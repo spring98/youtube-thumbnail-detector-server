@@ -17,10 +17,11 @@ class ImageAnalyzer:
         # GPU 사용 여부를 확인
         physical_devices = tf.config.experimental.list_physical_devices('GPU')
         if len(physical_devices) > 0:
-            print("Using GPU:", physical_devices)
+            # print("Using GPU:", physical_devices)
             tf.config.experimental.set_memory_growth(physical_devices[0], True)
         else:
-            print("No GPU found. Using CPU.")
+            # print("No GPU found. Using CPU.")
+            pass
 
         self.video_path = video_path
         self.target_image_path = target_image_path
@@ -36,7 +37,6 @@ class ImageAnalyzer:
 
     def load_target_image(self):
         img = image.load_img(self.target_image_path, target_size=(224, 224))
-        # img = image.load_img(self.target_image_path, target_size=(96, 96))
         img_data = image.img_to_array(img)
         img_data = np.expand_dims(img_data, axis=0)
         img_data = preprocess_input(img_data)
@@ -49,7 +49,6 @@ class ImageAnalyzer:
 
     def preprocess_frame(self, frame):
         frame = cv2.resize(frame, (224, 224))
-        # frame = cv2.resize(frame, (96, 96))
         frame = image.img_to_array(frame)
         frame = np.expand_dims(frame, axis=0)
         frame = preprocess_input(frame)
