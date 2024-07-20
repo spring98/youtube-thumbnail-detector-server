@@ -21,10 +21,16 @@ echo "Starting Gunicorn..."
 nohup gunicorn -w 16 -b 0.0.0.0:50001 app:app > logs/gunicorn.out 2>&1 &
 GUNICORN_PID=$!
 
+# Flower 실행
+echo "Starting Flower..."
+nohup celery -A tasks flower --loglevel=info --port=5555 > logs/flower.out 2>&1 &
+FLOWER_PID=$!
+
 # 모든 프로세스가 백그라운드에서 실행되고 있는지 확인
 echo "Gunicorn PID: $GUNICORN_PID"
 echo "Celery Worker PID: $CELERY_WORKER_PID"
 echo "Celery Beat PID: $CELERY_BEAT_PID"
+echo "Flower PID: $FLOWER_PID"
 
 # 종료 처리
 cleanup() {
@@ -41,6 +47,8 @@ cleanup() {
     kill $CELERY_WORKER_PID
     echo "Stopping Celery beat..."
     kill $CELERY_BEAT_PID
+    echo "Stopping Flower..."
+    kill $FLOWER_PID
     exit 0
 }
 
@@ -59,6 +67,10 @@ while true; do
     fi
     if ! ps -p $CELERY_BEAT_PID > /dev/null; then
         echo "Celery beat has stopped."
+        cleanup
+    fi
+    if ! ps -p $FLOWER_PID > /dev/null; then
+        echo "Flower has stopped."
         cleanup
     fi
 done
