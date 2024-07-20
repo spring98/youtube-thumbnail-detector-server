@@ -31,6 +31,12 @@ logger = logging.getLogger(__name__)
 #             [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=4096)])
 #     except RuntimeError as e:
 #         print(e)
+
+# TensorFlow GPU 설정
+physical_devices = tf.config.experimental.list_physical_devices('GPU')
+if len(physical_devices) > 0:
+    for device in physical_devices:
+        tf.config.experimental.set_memory_growth(device, True)
 class ImageAnalyzer:
     def __init__(self, video_path, target_image_path, sampling_interval=30):
         self.video_path = video_path
@@ -39,17 +45,8 @@ class ImageAnalyzer:
 
         self.input_size = (224, 224)  # 모델 입력 크기 설정
         self.model = MobileNetV3Small(weights='imagenet', include_top=False, pooling='avg', input_shape=self.input_size + (3,))
-        # self.model = MobileNetV3Small(weights='imagenet', include_top=False, pooling='avg')
-        # self.model = MobileNetV3Small(weights='imagenet', include_top=False, pooling='avg', input_shape=(96, 96, 3))
-        # self.model = MobileNetV2(weights='imagenet', include_top=False, pooling='avg')
 
         self.target_image_features = self.extract_features(self.load_target_image())
-
-        # TensorFlow GPU 설정
-        physical_devices = tf.config.experimental.list_physical_devices('GPU')
-        if len(physical_devices) > 0:
-            for device in physical_devices:
-                tf.config.experimental.set_memory_growth(device, True)
 
         # Eager Execution 모드 활성화
         tf.config.experimental_run_functions_eagerly(True)
