@@ -1,5 +1,8 @@
 #!/bin/zsh
 
+# 지금까지 쌓인 celery 작업큐 비우기
+celery -A tasks purge -f
+
 # logs 폴더 생성
 mkdir -p logs
 
