@@ -10,7 +10,8 @@ GUNICORN_PID=$!
 
 # Celery 워커 실행
 echo "Starting Celery worker..."
-nohup celery -A tasks worker --loglevel=info --pool=gevent --concurrency=16 > logs/celery_worker.out 2>&1 &
+#nohup celery -A tasks worker --loglevel=info --pool=gevent --concurrency=16 > logs/celery_worker.out 2>&1 &
+nohup celery -A tasks worker --loglevel=info --pool=prefork --concurrency=4 > logs/celery_worker.out 2>&1 &
 CELERY_WORKER_PID=$!
 
 # Celery 비트 실행

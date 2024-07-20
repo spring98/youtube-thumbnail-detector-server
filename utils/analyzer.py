@@ -14,29 +14,25 @@ import logging
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-# # XLA 컴파일러 활성화
-# tf.config.optimizer.set_jit(True)
-
-## Eager Execution 모드 활성화
-# tf.config.experimental_run_functions_eagerly(True)
-## tf.data 함수에 대한 즉시 실행 모드 활성화
-# tf.data.experimental.enable_debug_mode()
-#
-## GPU 메모리 설정
-# gpus = tf.config.experimental.list_physical_devices('GPU')
-# if gpus:
-#     try:
-#         tf.config.experimental.set_virtual_device_configuration(
-#             gpus[0],
-#             [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=4096)])
-#     except RuntimeError as e:
-#         print(e)
-
 # TensorFlow GPU 설정
 physical_devices = tf.config.experimental.list_physical_devices('GPU')
 if len(physical_devices) > 0:
+    # try:
+    #     tf.config.experimental.set_virtual_device_configuration(
+    #         gpus[0],
+    #         [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=4096)])
+    # except RuntimeError as e:
+    #     print(e)
     for device in physical_devices:
         tf.config.experimental.set_memory_growth(device, True)
+
+# Eager Execution 모드 활성화
+tf.config.experimental_run_functions_eagerly(True)
+# tf.data 함수에 대한 즉시 실행 모드 활성화
+tf.data.experimental.enable_debug_mode()
+# XLA 컴파일러 활성화
+tf.config.optimizer.set_jit(True)
+
 class ImageAnalyzer:
     def __init__(self, video_path, target_image_path, sampling_interval=30):
         self.video_path = video_path
@@ -45,15 +41,7 @@ class ImageAnalyzer:
 
         self.input_size = (224, 224)  # 모델 입력 크기 설정
         self.model = MobileNetV3Small(weights='imagenet', include_top=False, pooling='avg', input_shape=self.input_size + (3,))
-
         self.target_image_features = self.extract_features(self.load_target_image())
-
-        # Eager Execution 모드 활성화
-        tf.config.experimental_run_functions_eagerly(True)
-        # tf.data 함수에 대한 즉시 실행 모드 활성화
-        tf.data.experimental.enable_debug_mode()
-        # XLA 컴파일러 활성화
-        tf.config.optimizer.set_jit(True)
 
     def load_target_image(self):
         img = image.load_img(self.target_image_path, target_size=(224, 224))
