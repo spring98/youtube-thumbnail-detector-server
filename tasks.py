@@ -55,6 +55,7 @@ def save_processed_video_ids(video_ids):
 
 @app.task
 def process_video(video_id):
+    processed_video_ids = load_processed_video_ids()
     lock = FileLock(f"assets/{video_id}.lock")  # 락 파일 사용
     with lock:  # 락을 사용하여 중복 작업 방지
         existing_result = load_result_from_file(video_id)
@@ -76,6 +77,10 @@ def process_video(video_id):
             }
             save_result_to_file(video_id, result)
             delete_video_and_thumbnail(video_id)
+            # 처리한 동영상 ID 목록에 추가
+            processed_video_ids.append(video_id)
+            save_processed_video_ids(processed_video_ids)
+
             return result
         except Exception as e:
             result = {'error': str(e)}
