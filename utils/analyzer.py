@@ -17,14 +17,14 @@ logger = logging.getLogger(__name__)
 # TensorFlow GPU 설정
 physical_devices = tf.config.experimental.list_physical_devices('GPU')
 if len(physical_devices) > 0:
-    # try:
-    #     tf.config.experimental.set_virtual_device_configuration(
-    #         gpus[0],
-    #         [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=4096)])
-    # except RuntimeError as e:
-    #     print(e)
-    for device in physical_devices:
-        tf.config.experimental.set_memory_growth(device, True)
+    try:
+        tf.config.experimental.set_virtual_device_configuration(
+            physical_devices[0],
+            [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=4096)])
+    except RuntimeError as e:
+        print(e)
+    # for device in physical_devices:
+    #     tf.config.experimental.set_memory_growth(device, True)
 
 # Eager Execution 모드 활성화
 tf.config.experimental_run_functions_eagerly(True)

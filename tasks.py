@@ -2,6 +2,7 @@ from celery import Celery
 from celery.schedules import crontab
 from utils import downloader, analyzer
 from dotenv import load_dotenv
+from filelock import FileLock
 import requests
 import os
 import json
@@ -54,29 +55,31 @@ def save_processed_video_ids(video_ids):
 
 @app.task
 def process_video(video_id):
-    existing_result = load_result_from_file(video_id)
-    if existing_result:
-        return existing_result
+    lock = FileLock(f"assets/{video_id}.lock")  # 락 파일 사용
+    with lock:  # 락을 사용하여 중복 작업 방지
+        existing_result = load_result_from_file(video_id)
+        if existing_result:
+            return existing_result
 
-    try:
-        downloader.Downloader().execute(videoId=video_id)
-        video_path = f'assets/{video_id}/video.mp4'
-        target_image_path = f'assets/{video_id}/thumbnail.jpg'
+        try:
+            downloader.Downloader().execute(videoId=video_id)
+            video_path = f'assets/{video_id}/video.mp4'
+            target_image_path = f'assets/{video_id}/thumbnail.jpg'
 
-        analyzer_obj = analyzer.ImageAnalyzer(video_path=video_path, target_image_path=target_image_path)
-        best_frame, best_frame_time = analyzer_obj.find_most_similar_frame()
+            analyzer_obj = analyzer.ImageAnalyzer(video_path=video_path, target_image_path=target_image_path)
+            best_frame, best_frame_time = analyzer_obj.find_most_similar_frame()
 
-        result = {
-            'videoId': video_id,
-            'best_frame_time': best_frame_time,
-            'message': 'Best frame found successfully' if best_frame is not None else 'Could not find the best frame'
-        }
-        save_result_to_file(video_id, result)
-        delete_video_and_thumbnail(video_id)
-        return result
-    except Exception as e:
-        result = {'error': str(e)}
-        return result
+            result = {
+                'videoId': video_id,
+                'best_frame_time': best_frame_time,
+                'message': 'Best frame found successfully' if best_frame is not None else 'Could not find the best frame'
+            }
+            save_result_to_file(video_id, result)
+            delete_video_and_thumbnail(video_id)
+            return result
+        except Exception as e:
+            result = {'error': str(e)}
+            return result
 
 @app.task
 def fetch_and_download_videos():

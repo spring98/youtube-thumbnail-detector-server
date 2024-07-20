@@ -3,21 +3,20 @@
 # logs 폴더 생성
 mkdir -p logs
 
-# Gunicorn 서버 실행
-echo "Starting Gunicorn..."
-nohup gunicorn -w 16 -b 0.0.0.0:50001 app:app > logs/gunicorn.out 2>&1 &
-GUNICORN_PID=$!
-
 # Celery 워커 실행
 echo "Starting Celery worker..."
-#nohup celery -A tasks worker --loglevel=info --pool=gevent --concurrency=16 > logs/celery_worker.out 2>&1 &
-nohup celery -A tasks worker --loglevel=info --pool=prefork --concurrency=4 > logs/celery_worker.out 2>&1 &
+nohup celery -A tasks worker --loglevel=info --pool=gevent --concurrency=16 > logs/celery_worker.out 2>&1 &
 CELERY_WORKER_PID=$!
 
 # Celery 비트 실행
 echo "Starting Celery beat..."
 nohup celery -A tasks beat --loglevel=info > logs/celery_beat.out 2>&1 &
 CELERY_BEAT_PID=$!
+
+# Gunicorn 서버 실행
+echo "Starting Gunicorn..."
+nohup gunicorn -w 16 -b 0.0.0.0:50001 app:app > logs/gunicorn.out 2>&1 &
+GUNICORN_PID=$!
 
 # 모든 프로세스가 백그라운드에서 실행되고 있는지 확인
 echo "Gunicorn PID: $GUNICORN_PID"
