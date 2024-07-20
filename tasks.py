@@ -14,6 +14,8 @@ logger = logging.getLogger(__name__)
 
 # Eager Execution 모드 활성화
 tf.config.experimental_run_functions_eagerly(True)
+# tf.data 함수에 대한 즉시 실행 모드 활성화
+tf.data.experimental.enable_debug_mode()
 
 app = Celery('tasks', broker='redis://localhost:6379/0', backend='redis://localhost:6379/0')
 
