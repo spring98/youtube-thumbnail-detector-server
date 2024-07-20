@@ -2,6 +2,7 @@ from celery import Celery
 from celery.schedules import crontab
 from utils import downloader, analyzer
 from dotenv import load_dotenv
+import tensorflow as tf
 import requests
 import os
 import json
@@ -10,6 +11,9 @@ import logging
 # 로깅 설정
 logging.basicConfig(level=logging.DEBUG)
 logger = logging.getLogger(__name__)
+
+# Eager Execution 모드 활성화
+tf.config.experimental_run_functions_eagerly(True)
 
 app = Celery('tasks', broker='redis://localhost:6379/0', backend='redis://localhost:6379/0')
 
