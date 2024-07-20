@@ -8,21 +8,26 @@ from tensorflow.keras.preprocessing import image
 from sklearn.metrics.pairwise import cosine_similarity
 import matplotlib.pyplot as plt
 import tensorflow as tf
+import logging
 
+# 로깅 설정
+logging.basicConfig(level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+
+# XLA 컴파일러 활성화
+tf.config.optimizer.set_jit(True)
+
+# GPU 메모리 설정
+gpus = tf.config.experimental.list_physical_devices('GPU')
+if gpus:
+    try:
+        tf.config.experimental.set_virtual_device_configuration(
+            gpus[0],
+            [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=4096)])
+    except RuntimeError as e:
+        print(e)
 class ImageAnalyzer:
     def __init__(self, video_path, target_image_path, sampling_interval=30):
-        # XLA 컴파일러 활성화
-        tf.config.optimizer.set_jit(True)
-
-        # GPU 사용 여부를 확인
-        physical_devices = tf.config.experimental.list_physical_devices('GPU')
-        if len(physical_devices) > 0:
-            # print("Using GPU:", physical_devices)
-            tf.config.experimental.set_memory_growth(physical_devices[0], True)
-        else:
-            # print("No GPU found. Using CPU.")
-            pass
-
         self.video_path = video_path
         self.target_image_path = target_image_path
         self.sampling_interval = sampling_interval
@@ -84,7 +89,7 @@ class ImageAnalyzer:
                 remaining_time = estimated_total_time - elapsed_time
                 best_frame_time = best_frame_index / frame_rate
 
-                print(f"Progress: {progress * 100:.2f}% | Elapsed Time: {elapsed_time:.2f}s "
+                logger.debug(f"Progress: {progress * 100:.2f}% | Elapsed Time: {elapsed_time:.2f}s "
                       f"| Best Similarity: {best_similarity:.2f} | Best FrameTime: {best_frame_time:.2f}s")
 
         return best_frame_index, best_similarity
@@ -92,7 +97,7 @@ class ImageAnalyzer:
     def find_most_similar_frame(self):
         cap = cv2.VideoCapture(self.video_path)
         if not cap.isOpened():
-            print("Error: Could not open video.")
+            logger.debug("Error: Could not open video.")
             return None, None
 
         frame_rate = cap.get(cv2.CAP_PROP_FPS)
@@ -100,7 +105,7 @@ class ImageAnalyzer:
         video_duration = total_frames / frame_rate
 
         if video_duration > 1800:  # 동영상 길이가 30분(1800초) 이상이면
-            print("Video is longer than 20 minutes. Skipping analysis.")
+            logger.debug("Video is longer than 20 minutes. Skipping analysis.")
             return None, -1
 
         start_time = time.time()
@@ -114,7 +119,7 @@ class ImageAnalyzer:
         best_frame_index, best_similarity = self.find_best_frame_in_range(cap, start_idx, end_idx, 1, frame_rate)
 
         elapsed_time = time.time() - start_time
-        print(f"Total elapsed time: {elapsed_time:.2f}s")
+        logger.debug(f"Total elapsed time: {elapsed_time:.2f}s")
 
         best_frame_time = best_frame_index / frame_rate
 
@@ -122,7 +127,7 @@ class ImageAnalyzer:
         cap.set(cv2.CAP_PROP_POS_FRAMES, best_frame_index)
         ret, best_frame = cap.read()
         if not ret:
-            print("Error: Could not read the best frame.")
+            logger.debug("Error: Could not read the best frame.")
             return None, None
 
         cap.release()

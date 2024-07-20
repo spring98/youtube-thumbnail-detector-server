@@ -1,3 +1,5 @@
 assets/
+logs/
 .env
 .videos.json
+celerybeat-schedule.db
