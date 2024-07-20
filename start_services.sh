@@ -8,7 +8,7 @@ mkdir -p logs
 
 # Celery 워커 실행
 echo "Starting Celery worker..."
-nohup celery -A tasks worker --loglevel=info --pool=gevent --concurrency=16 > logs/celery_worker.out 2>&1 &
+nohup celery -A tasks worker --loglevel=info --pool=prefork --concurrency=16 > logs/celery_worker.out 2>&1 &
 CELERY_WORKER_PID=$!
 
 # Celery 비트 실행
@@ -29,6 +29,7 @@ echo "Celery Beat PID: $CELERY_BEAT_PID"
 # 종료 처리
 cleanup() {
     echo "Stopping Gunicorn..."
+    pkill -P $GUNICORN_PID  # Gunicorn의 모든 자식 프로세스를 종료
     kill $GUNICORN_PID
     echo "Stopping Celery worker..."
     kill $CELERY_WORKER_PID
