@@ -31,6 +31,12 @@ cleanup() {
     echo "Stopping Gunicorn..."
     pkill -P $GUNICORN_PID  # Gunicorn의 모든 자식 프로세스를 종료
     kill $GUNICORN_PID
+
+    # 자식 프로세스가 남아 있을 경우 추가로 종료
+    for pid in $(pgrep -P $GUNICORN_PID); do
+        kill $pid
+    done
+
     echo "Stopping Celery worker..."
     kill $CELERY_WORKER_PID
     echo "Stopping Celery beat..."
