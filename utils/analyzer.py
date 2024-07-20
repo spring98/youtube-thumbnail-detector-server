@@ -17,6 +17,11 @@ logger = logging.getLogger(__name__)
 # XLA 컴파일러 활성화
 tf.config.optimizer.set_jit(True)
 
+# Eager Execution 모드 활성화
+tf.config.experimental_run_functions_eagerly(True)
+# tf.data 함수에 대한 즉시 실행 모드 활성화
+tf.data.experimental.enable_debug_mode()
+
 # GPU 메모리 설정
 gpus = tf.config.experimental.list_physical_devices('GPU')
 if gpus:
